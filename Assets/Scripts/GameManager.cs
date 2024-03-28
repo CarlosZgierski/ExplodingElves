@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -13,10 +14,20 @@ public class GameManager : MonoBehaviour
     [SerializeField] Transform blueSpawn;
     [Space]
     [SerializeField] ElfsPoolingManager elfsPoolingManager;
+    [Space]
+    [SerializeField] Slider blackSpawnSlider; //need to add the slider logid, should be simple
+    [SerializeField] Slider redSpawnSlider;
+    [SerializeField] Slider whiteSpawnSlider;
+    [SerializeField] Slider clueSpawnSlider;
 
     bool spawning = true;
     float minSpawnTime = 0.5f;
-    float maxSpawnTime = .5f;
+    float maxSpawnTime = 2f;
+
+    float blackCurrentSpawnTime = 1f;
+    float redCurrentSpawnTime = 1f;
+    float whiteCurrentSpawnTime = 1f;
+    float blueCurrentSpawnTime = 1f;
 
     private void Start()
     {
@@ -33,27 +44,46 @@ public class GameManager : MonoBehaviour
         StartCoroutine(SpawnElfsByType(ElfType.Blue));
     }
 
-    public void CreateElfFromCollision(ElfController controller1, ElfController controller2, ElfType elfType)
+    public void CreateElfFromCollision(ElfController elf1, ElfController elf2, ElfType elfType)
     {
-        //controller1.SetNewDestination();
-        //controller2.SetNewDestination();
+        Vector3 destination = new Vector3(Random.Range(whiteSpawn.position.x, blueSpawn.position.x), 1, Random.Range(redSpawn.position.z, blackSpawn.position.z));
 
-        //Create new elf here
+        elf1.SetNewDestination(destination);
+        elf1.StartCollisionCooldown();
+        elf2.SetNewDestination(destination * -1);
+        elf2.StartCollisionCooldown();
+
+        ElfController newElf = elfsPoolingManager.Pool.Get();
+        newElf.transform.position = Vector3.Lerp(elf1.transform.position, elf2.transform.position, 0.5f); ;
+        newElf.SetNewElfToMove(new Vector3(Random.Range(whiteSpawn.position.x, blueSpawn.position.x), 1, Random.Range(redSpawn.position.z, blackSpawn.position.z)), elfType);
+        newElf.StartCollisionCooldown();
+    }
+
+    public void ChangeElfsDestinationAfterCollision(ElfController elf1, ElfController elf2)
+    {
+        Vector3 destination = new Vector3(Random.Range(whiteSpawn.position.x, blueSpawn.position.x), 1, Random.Range(redSpawn.position.z, blackSpawn.position.z));
+        elf1.SetNewDestination(destination);
+        elf2.SetNewDestination(destination * -1);
     }
 
     public void ReleaseElfFromCollision(ElfController controller1, ElfController controller2)
     {
-
+        elfsPoolingManager.Pool.Release(controller1);
+        elfsPoolingManager.Pool.Release(controller2);
+        //create all sfx and vfx here
     }
 
     public void ElfCompletedPath(ElfController controller) 
     {
-        elfsPoolingManager.Pool.Release(controller);
+        controller.SetNewDestination(new Vector3(Random.Range(whiteSpawn.position.x, blueSpawn.position.x), 1, Random.Range(redSpawn.position.z, blackSpawn.position.z)));
     }
 
     IEnumerator SpawnElfsByType(ElfType type)
     {
         Vector3 spawnPosition;
+        ElfController newElf;
+        float spawnDelay;
+
         switch (type)
         {
             case ElfType.Black:
@@ -75,10 +105,28 @@ public class GameManager : MonoBehaviour
 
         while (spawning)
         {
-            yield return new WaitForSecondsRealtime(maxSpawnTime);
-            ElfController newElf = elfsPoolingManager.Pool.Get();
+            switch (type)
+            {
+                case ElfType.Black:
+                    spawnDelay = blackCurrentSpawnTime;
+                    break;
+                case ElfType.Red:
+                    spawnDelay = redCurrentSpawnTime;
+                    break;
+                case ElfType.White:
+                    spawnDelay = whiteCurrentSpawnTime;
+                    break;
+                case ElfType.Blue:
+                    spawnDelay = blueCurrentSpawnTime;
+                    break;
+                default:
+                    spawnDelay = 1f;
+                    break;
+            }
+            yield return new WaitForSeconds(spawnDelay);
+            newElf = elfsPoolingManager.Pool.Get();
             newElf.transform.position = spawnPosition;
-            newElf.SetNewElfToMove(new Vector3(Random.Range(-125f,125f), 1, Random.Range(-125f, 125f)), type);
+            newElf.SetNewElfToMove(new Vector3(Random.Range(whiteSpawn.position.x, blueSpawn.position.x), 1, Random.Range(redSpawn.position.z, blackSpawn.position.z)), type);
         }
     }
 }

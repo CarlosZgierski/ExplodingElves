@@ -3,6 +3,8 @@ using UnityEngine.Pool;
 
 public class ElfsPoolingManager : MonoBehaviour
 {
+    [SerializeField] Transform elfsTransformParent;
+
     IObjectPool<ElfController> pool;
     ElfController prefab;
     GameManager gameManager;
@@ -21,7 +23,7 @@ public class ElfsPoolingManager : MonoBehaviour
 
     ElfController CreatePooledItem()
     {
-        ElfController elfController = Instantiate(prefab);
+        ElfController elfController = Instantiate(prefab, elfsTransformParent);
         elfController.Initialize(gameManager);
         return elfController;
     }

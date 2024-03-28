@@ -1,3 +1,5 @@
+using JetBrains.Annotations;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -8,6 +10,11 @@ public class ElfController : MonoBehaviour
     [Header("Visual")]
     [SerializeField] MeshRenderer thisMesh;
 
+    float newCollisionCooldown = 1f; //in seconds
+    bool isAbleToCollide;
+
+    public bool IsAbleToCollide => isAbleToCollide;
+
     ElfType elfType;
     GameManager gameManager;
     Vector3 currentDestination;
@@ -16,7 +23,7 @@ public class ElfController : MonoBehaviour
 
     private void Update()
     {
-        if(agent.remainingDistance <= 0.2f)
+        if (agent.remainingDistance <= 0.2f)
         {
             gameManager.ElfCompletedPath(this);
         }
@@ -25,6 +32,7 @@ public class ElfController : MonoBehaviour
     public void Initialize(GameManager gameManager)
     {
         this.gameManager = gameManager;
+        StartCollisionCooldown();
     }
 
     public void SetNewElfToMove(Vector3 destination, ElfType elfType)
@@ -43,23 +51,39 @@ public class ElfController : MonoBehaviour
         currentDestination = destination;
     }
 
-    public void OnCollisionEnter(Collision collision)
+    public void OnTriggerEnter(Collider other)
     {
-        ElfController otherController = collision.gameObject.GetComponent<ElfController>();
+        ElfController otherController = other.gameObject.GetComponent<ElfController>();
 
-        if (otherController.ElfType != this.elfType)
+        if (this.transform.GetHashCode() > other.transform.GetHashCode())
         {
-            //Explode
-            //Deactivate
-        }
-        else
-        {
-            if (this.transform.GetHashCode() > collision.transform.GetHashCode())
+            if (otherController.ElfType != this.elfType)
             {
-                gameManager.CreateElfFromCollision(this, otherController, this.elfType);
+                gameManager.ReleaseElfFromCollision(this, otherController);
             }
-            //Change this elf Destination
+            else
+            {
+                if (this.isAbleToCollide || otherController.IsAbleToCollide)
+                {
+                    gameManager.CreateElfFromCollision(this, otherController, this.elfType);
+                }
+                else
+                {
+                    gameManager.ChangeElfsDestinationAfterCollision(this, otherController);
+                }
+            }
         }
     }
 
+    public void StartCollisionCooldown()
+    {
+        StartCoroutine(StartCooldownForCollisionCoroutine());
+    }
+
+    IEnumerator StartCooldownForCollisionCoroutine()
+    {
+        isAbleToCollide = false;
+        yield return new WaitForSeconds(newCollisionCooldown);
+        isAbleToCollide = true;
+    }
 }
