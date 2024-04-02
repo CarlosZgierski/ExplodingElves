@@ -48,7 +48,7 @@ public class GameManager : MonoBehaviour
     int whiteElfsCounter;
     int blueElfsCounter;
 
-    int maxAllowedSpawnedElfsByColor = 2000;
+    int maxAllowedSpawnedElfsByColor = 500;
     bool unlimitedElfSpawns = false;
 
     void Start()
@@ -120,13 +120,16 @@ public class GameManager : MonoBehaviour
                 break;
         }
 
-        if (shouldSpawn || unlimitedElfSpawns)
+        if (spawning)
         {
-            ElfController newElf = elfsPoolingManager.Pool.Get();
-            newElf.transform.position = Vector3.Lerp(elf1.transform.position, elf2.transform.position, 0.5f);
-            newElf.SetNewElfToMove(new Vector3(Random.Range(whiteSpawn.position.x, blueSpawn.position.x), 1, Random.Range(redSpawn.position.z, blackSpawn.position.z)), elfType);
-            CounterAddByType(elfType);
-            newElf.StartCollisionCooldown();
+            if (shouldSpawn || unlimitedElfSpawns)
+            {
+                ElfController newElf = elfsPoolingManager.Pool.Get();
+                newElf.transform.position = Vector3.Lerp(elf1.transform.position, elf2.transform.position, 0.5f);
+                newElf.SetNewElfToMove(new Vector3(Random.Range(whiteSpawn.position.x, blueSpawn.position.x), 1, Random.Range(redSpawn.position.z, blackSpawn.position.z)), elfType);
+                CounterAddByType(elfType);
+                newElf.StartCollisionCooldown();
+            }
         }
     }
 
