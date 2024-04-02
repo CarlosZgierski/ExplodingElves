@@ -32,10 +32,11 @@ public class GameManager : MonoBehaviour
     [SerializeField] TMP_Text blueCounterText;
     [Space]
     [SerializeField] Toggle spawnLimiterToggle;
+    [SerializeField] TMP_Text spawnLimiterText;
     [SerializeField] Toggle autoSpawnToggle;
 
     bool spawning = true;
-    float minSpawnTime = 0.5f;
+    float minSpawnTime = 1f;
     float maxSpawnTime = 3f;
 
     float blackCurrentSpawnTime = 1f;
@@ -48,7 +49,7 @@ public class GameManager : MonoBehaviour
     int whiteElfsCounter;
     int blueElfsCounter;
 
-    int maxAllowedSpawnedElfsByColor = 500;
+    int maxAllowedSpawnedElfsByColor = 250;
     bool unlimitedElfSpawns = false;
 
     void Start()
@@ -89,6 +90,7 @@ public class GameManager : MonoBehaviour
         blueSpawnSlider.value = 0.5f;
 
         spawnLimiterToggle.onValueChanged.AddListener(delegate { unlimitedElfSpawns = !spawnLimiterToggle.isOn; });
+        spawnLimiterText.text = $"Limit elf spawn to {maxAllowedSpawnedElfsByColor} per color";
         autoSpawnToggle.onValueChanged.AddListener(delegate { ChangeAutoSpawnBool(); });
     }
 
@@ -265,16 +267,16 @@ public class GameManager : MonoBehaviour
         switch (type)
         {
             case ElfType.Black:
-                blackCurrentSpawnTime = (minSpawnTime + (maxSpawnTime - minSpawnTime) * blackSpawnSlider.normalizedValue);
+                blackCurrentSpawnTime = (minSpawnTime + (maxSpawnTime - minSpawnTime) * System.MathF.Round(blackSpawnSlider.normalizedValue,2));
                 break;
             case ElfType.Red:
-                redCurrentSpawnTime = (minSpawnTime + (maxSpawnTime - minSpawnTime) * redSpawnSlider.normalizedValue);
+                redCurrentSpawnTime = (minSpawnTime + (maxSpawnTime - minSpawnTime) * System.MathF.Round(redSpawnSlider.normalizedValue,2));
                 break;
             case ElfType.White:
-                whiteCurrentSpawnTime = (minSpawnTime + (maxSpawnTime - minSpawnTime) * whiteSpawnSlider.normalizedValue);
+                whiteCurrentSpawnTime = (minSpawnTime + (maxSpawnTime - minSpawnTime) * System.MathF.Round(whiteSpawnSlider.normalizedValue,2));
                 break;
             case ElfType.Blue:
-                blueCurrentSpawnTime = (minSpawnTime + (maxSpawnTime - minSpawnTime) * blueSpawnSlider.normalizedValue);
+                blueCurrentSpawnTime = (minSpawnTime + (maxSpawnTime - minSpawnTime) * System.MathF.Round(blueSpawnSlider.normalizedValue, 2));
                 break;
             default:
                 break;
