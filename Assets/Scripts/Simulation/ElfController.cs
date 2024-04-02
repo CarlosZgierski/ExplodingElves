@@ -47,7 +47,6 @@ public class ElfController : MonoBehaviour
     public void SetNewDestination(Vector3 destination)
     {
         agent.SetDestination(destination);
-        currentDestination = destination;
     }
 
     public void OnTriggerEnter(Collider other)
