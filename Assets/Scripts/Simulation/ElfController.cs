@@ -10,14 +10,13 @@ public class ElfController : MonoBehaviour
     [Header("Visual")]
     [SerializeField] MeshRenderer thisMesh;
 
-    float newCollisionCooldown = 1f; //in seconds
+    float newCollisionCooldown = 1.5f; //in seconds
     bool isAbleToCollide;
 
     public bool IsAbleToCollide => isAbleToCollide;
 
     ElfType elfType;
     GameManager gameManager;
-    Vector3 currentDestination;
 
     public ElfType ElfType => elfType;
 
